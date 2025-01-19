@@ -11,6 +11,7 @@ const HomePage: React.FC = () => {
 
 	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
+		console.log(file);
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = () => {
@@ -73,6 +74,7 @@ const HomePage: React.FC = () => {
 							className="cursor-pointer bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
 							Seleccionar imagen
 						</label>
+
 						<input
 							id="image-upload"
 							type="file"
@@ -80,6 +82,7 @@ const HomePage: React.FC = () => {
 							className="hidden"
 							onChange={handleImageChange}
 						/>
+
 						{selectedImage && (
 							<p className="mt-2 text-gray-500">Imagen seleccionada</p>
 						)}
