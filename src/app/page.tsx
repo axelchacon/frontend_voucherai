@@ -2,22 +2,50 @@
 
 import React, { useState } from "react";
 import Image from "next/image"; // Importamos el componente Image de Next.js
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../config/firebaseConfig"; // Asegúrate de tener tu configuración de Firebase correctamente
 
 const HomePage: React.FC = () => {
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [ocrResult, setOcrResult] = useState<string>(
 		"Simulated OCR result: Extracted text goes here."
 	);
 
-	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleImageChange = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = event.target.files?.[0];
-		console.log(file);
 		if (file) {
+			setImageFile(file); // Guardamos el archivo para subirlo a Firebase
 			const reader = new FileReader();
 			reader.onload = () => {
-				setSelectedImage(reader.result as string); // Guardamos la imagen en formato Base64
+				setSelectedImage(reader.result as string); // Mostramos la imagen seleccionada
 			};
 			reader.readAsDataURL(file);
+
+			// Subir automáticamente la imagen a Firebase
+			await uploadImageToFirebase(file);
+		}
+	};
+
+	const uploadImageToFirebase = async (file: File) => {
+		try {
+			const fileName = `${Date.now()}_raw_pagos.png`;
+			const imageRef = ref(storage, "room-design/" + fileName);
+
+			// Subir la imagen a Firebase Storage
+			await uploadBytes(imageRef, file);
+
+			// Obtener la URL de descarga de la imagen (si necesitas usarla en el futuro)
+			const URLFilePago = await getDownloadURL(imageRef);
+			console.log(URLFilePago);
+
+			// Actualizar el mensaje de resultado
+			setOcrResult("Okok, imagen subida");
+		} catch (error) {
+			console.error("Error subiendo la imagen a Firebase: ", error);
+			setOcrResult("Error al subir la imagen.");
 		}
 	};
 
@@ -25,12 +53,11 @@ const HomePage: React.FC = () => {
 		<div className="min-h-screen flex flex-col">
 			{/* Navbar */}
 			<nav className="bg-gray-800 p-4 flex justify-center">
-				{/* Logo reemplazado */}
 				<Image
 					src="/Modern Creative Logo Instagram Post.png" // Ruta de la imagen en la carpeta public
 					alt="Logo"
-					width={150} // Ajusta el ancho según necesites
-					height={50} // Ajusta la altura según necesites
+					width={150}
+					height={50}
 					className="object-contain"
 				/>
 			</nav>
@@ -82,10 +109,6 @@ const HomePage: React.FC = () => {
 							className="hidden"
 							onChange={handleImageChange}
 						/>
-
-						{selectedImage && (
-							<p className="mt-2 text-gray-500">Imagen seleccionada</p>
-						)}
 					</div>
 
 					{/* OCR Result */}
