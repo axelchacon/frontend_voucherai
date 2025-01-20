@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../config/firebaseConfig";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
+import { AlertCircle } from "lucide-react";
+
+import { Progress } from "../components/ui/progress";
 
 const HomePage: React.FC = () => {
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -19,8 +23,17 @@ const HomePage: React.FC = () => {
 		resultimage?: string;
 	} | null>(null);
 
+	// Estado para el mensaje de error
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+	// Estado para controlar la visibilidad de la alerta
+	const [showAlert, setShowAlert] = useState<boolean>(false);
+
+	// Estado para el progreso de carga
+	const [progress, setProgress] = useState<number>(0);
+	const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+	// Manejar la selección de una imagen
 	const handleImageChange = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -36,13 +49,26 @@ const HomePage: React.FC = () => {
 		}
 	};
 
+	// Procesar la imagen
 	const processImage = async (file: File) => {
 		try {
+			// Inicializar el progreso
+			setProgress(0);
+			setIsProcessing(true);
+
+			// Simular progreso de carga inicial
+			setTimeout(() => setProgress(30), 500);
+
 			// Subir la imagen a Firebase
 			const fileName = `${Date.now()}_voucher.png`;
 			const imageRef = ref(storage, "room-design/" + fileName);
 			await uploadBytes(imageRef, file);
 			const imageUrl = await getDownloadURL(imageRef);
+
+			console.log("Image URL:", imageUrl);
+
+			// Simular progreso al 60%
+			setTimeout(() => setProgress(60), 500);
 
 			// Enviar la URL al backend
 			const response = await fetch("http://localhost:4000/api/vouchers", {
@@ -51,15 +77,33 @@ const HomePage: React.FC = () => {
 				body: JSON.stringify({ image: imageUrl }),
 			});
 
+			// Simular progreso al 90%
+			setTimeout(() => setProgress(90), 500);
+
 			if (!response.ok) {
 				const errorData = await response.json();
-				setErrorMessage(`Error: ${errorData.message}`);
+				setErrorMessage(
+					`Error: Upps, No pudimos procesar la imagen. Inténtalo nuevamente subiendo otra imagen o la misma imagen. ${errorData.message}`
+				);
 				setProcessedData(null);
+
+				// Mostrar alerta
+				setShowAlert(true);
+
+				// Ocultar alerta después de 10 segundos
+				setTimeout(() => {
+					setShowAlert(false);
+				}, 10000);
+
+				setIsProcessing(false);
 				return;
 			}
 
 			const data = await response.json();
 			console.log("Data from AI:", data);
+
+			// Simular progreso al 100%
+			setTimeout(() => setProgress(100), 500);
 
 			// Actualizar el estado con los datos procesados
 			setProcessedData({
@@ -71,11 +115,32 @@ const HomePage: React.FC = () => {
 				resultimage: data.resultimage,
 			});
 
-			setErrorMessage(null); // Limpiar cualquier error previo
-		} catch (error) {
+			// Limpiar cualquier error previo
+			setErrorMessage(null);
+			setShowAlert(false);
+		} catch (error: any) {
 			console.error("Error processing image:", error);
-			setErrorMessage("Error procesando la imagen.");
+
+			// Actualizar el mensaje de error
+			setErrorMessage(
+				"Upps, No pudimos procesar la imagen. Inténtalo nuevamente subiendo otra imagen o la misma imagen."
+			);
+
+			// Mostrar alerta
+			setShowAlert(true);
+
+			// Ocultar alerta después de 10 segundos
+			setTimeout(() => {
+				setShowAlert(false);
+			}, 10000);
+
 			setProcessedData(null);
+		} finally {
+			// Ocultar el progreso y finalizar el estado de procesamiento
+			setTimeout(() => {
+				setProgress(0);
+				setIsProcessing(false);
+			}, 1000);
 		}
 	};
 
@@ -91,12 +156,29 @@ const HomePage: React.FC = () => {
 				/>
 			</nav>
 
+			{/* Alerta debajo del Navbar */}
+			{showAlert && (
+				<div className="w-full bg-red-50 py-4 px-6 flex justify-center">
+					<Alert variant="destructive" className="max-w-4xl w-full">
+						<AlertCircle className="h-4 w-4" />
+						<AlertTitle>Error</AlertTitle>
+						<AlertDescription>{errorMessage}</AlertDescription>
+					</Alert>
+				</div>
+			)}
+
 			{/* Main Content */}
 			<main className="flex-grow container mx-auto p-8">
 				<div className="text-center mb-8">
 					<h2 className="text-2xl font-bold">Gestión de Vouchers</h2>
 					<p className="text-gray-600">Sube un voucher para procesar con IA.</p>
 				</div>
+
+				{isProcessing && (
+					<div className="flex justify-center mb-4">
+						<Progress value={progress} className="w-[60%]" />
+					</div>
+				)}
 
 				<div className="flex justify-center gap-8">
 					{/* Upload Area */}
