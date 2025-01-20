@@ -69,9 +69,10 @@ const HomePage: React.FC = () => {
 
 			// Simular progreso al 60%
 			setTimeout(() => setProgress(60), 500);
+			const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 			// Enviar la URL al backend
-			const response = await fetch("http://localhost:4000/api/vouchers", {
+			const response = await fetch(`${backendUrl}/api/vouchers`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ image: imageUrl }),
