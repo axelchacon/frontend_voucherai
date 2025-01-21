@@ -18,8 +18,8 @@ const UploadArea: React.FC<UploadAreaProps> = ({
 				<Image
 					src={selectedImage}
 					alt="Preview"
-					width={256}
-					height={256}
+					width={450}
+					height={450}
 					className="mb-4 object-contain"
 				/>
 			) : (
