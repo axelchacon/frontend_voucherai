@@ -22,7 +22,6 @@ const HomePage: React.FC = () => {
 	} | null>(null);
 
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [showAlert, setShowAlert] = useState<boolean>(false);
 	const [progress, setProgress] = useState<number>(0);
 	const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
@@ -67,8 +66,7 @@ const HomePage: React.FC = () => {
 				setErrorMessage(
 					`Error: Upps, No pudimos procesar la imagen. ${errorData.message}`
 				);
-				setShowAlert(true);
-				setTimeout(() => setShowAlert(false), 10000);
+				setTimeout(() => setErrorMessage(null), 10000); // Elimina el mensaje de error después de 10s
 				setIsProcessing(false);
 				return;
 			}
@@ -78,10 +76,9 @@ const HomePage: React.FC = () => {
 			setTimeout(() => setProgress(100), 500);
 			setProcessedData(data);
 			setErrorMessage(null);
-		} catch (error: unknown) {
+		} catch {
 			setErrorMessage("Error al procesar la imagen.");
-			setShowAlert(true);
-			setTimeout(() => setShowAlert(false), 10000);
+			setTimeout(() => setErrorMessage(null), 10000); // Elimina el mensaje de error después de 10s
 		} finally {
 			setTimeout(() => {
 				setProgress(0);
