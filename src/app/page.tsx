@@ -47,6 +47,7 @@ const HomePage: React.FC = () => {
 			const imageRef = ref(storage, "room-design/" + fileName);
 			await uploadBytes(imageRef, file);
 			const imageUrl = await getDownloadURL(imageRef);
+			console.log("imageUrl", imageUrl);
 
 			setTimeout(() => setProgress(60), 500);
 			const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -61,6 +62,7 @@ const HomePage: React.FC = () => {
 
 			if (!response.ok) {
 				const errorData = await response.json();
+
 				setErrorMessage(
 					`Error: Upps, No pudimos procesar la imagen. ${errorData.message}`
 				);
@@ -71,6 +73,7 @@ const HomePage: React.FC = () => {
 			}
 
 			const data = await response.json();
+			console.log("data", data);
 			setTimeout(() => setProgress(100), 500);
 			setProcessedData(data);
 			setErrorMessage(null);
