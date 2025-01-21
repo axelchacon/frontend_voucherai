@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Navbar from "../app/_components/Navbar";
+import Navbar from "./_components/Navbar";
 import AlertNotification from "./_components/AlertNotification";
 import UploadArea from "./_components/UploadArea";
-import ResultsDisplay from "../app/_components/ResultsDisplay";
-import Footer from "../app/_components/Footer";
+import ResultsDisplay from "./_components/ResultsDisplay";
+import Footer from "./_components/Footer";
 import { Progress } from "../components/ui/progress";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../config/firebaseConfig";
@@ -20,6 +20,7 @@ const HomePage: React.FC = () => {
 		operation?: string;
 		resultimage?: string;
 	} | null>(null);
+
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [showAlert, setShowAlert] = useState<boolean>(false);
 	const [progress, setProgress] = useState<number>(0);
