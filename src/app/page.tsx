@@ -11,7 +11,6 @@ import { Progress } from "../components/ui/progress";
 
 const HomePage: React.FC = () => {
 	const [selectedImage, setSelectedImage] = useState<string | null>(null);
-	const [imageFile, setImageFile] = useState<File | null>(null);
 
 	// Estado para almacenar los resultados procesados
 	const [processedData, setProcessedData] = useState<{
@@ -39,7 +38,6 @@ const HomePage: React.FC = () => {
 	) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			setImageFile(file);
 			const reader = new FileReader();
 			reader.onload = () => setSelectedImage(reader.result as string);
 			reader.readAsDataURL(file);
@@ -119,7 +117,7 @@ const HomePage: React.FC = () => {
 			// Limpiar cualquier error previo
 			setErrorMessage(null);
 			setShowAlert(false);
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Error processing image:", error);
 
 			// Actualizar el mensaje de error
@@ -185,10 +183,12 @@ const HomePage: React.FC = () => {
 					{/* Upload Area */}
 					<div className="flex flex-col items-center border-dashed border-2 p-4 rounded-lg">
 						{selectedImage ? (
-							<img
+							<Image
 								src={selectedImage}
 								alt="Preview"
-								className="mb-4 w-64 h-64 object-contain"
+								width={256}
+								height={256}
+								className="mb-4 object-contain"
 							/>
 						) : (
 							<p className="text-gray-500 mb-4">
